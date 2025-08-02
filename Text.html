@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Text File Translator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f7f8fa;
+    margin: 0;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    color: #0077cc;
+  }
+  label, select, button {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+  }
+  textarea {
+    width: 100%;
+    max-width: 600px;
+    height: 250px;
+    margin-top: 1rem;
+    font-size: 1rem;
+    padding: 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    resize: vertical;
+  }
+  .container {
+    max-width: 620px;
+    width: 100%;
+  }
+  button {
+    background: #0077cc;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  button:hover {
+    background: #005fa3;
+  }
+  #downloadBtn {
+    margin-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Text File Translator</h1>
+  
+  <label for="sourceLang">Source Language:</label>
+  <select id="sourceLang" aria-label="Source Language">
+    <option value="en">English</option>
+    <option value="hi">Hindi</option>
+    <option value="es">Spanish</option>
+    <option value="fr">French</option>
+    <option value="de">German</option>
+    <option value="zh">Chinese</option>
+    <!-- Add more languages as needed -->
+  </select>
+
+  <label for="targetLang">Target Language:</label>
+  <select id="targetLang" aria-label="Target Language" >
+    <option value="hi">Hindi</option>
+    <option value="en" selected>English</option>
+    <option value="es">Spanish</option>
+    <option value="fr">French</option>
+    <option value="de">German</option>
+    <option value="zh">Chinese</option>
+    <!-- Add more languages as needed -->
+  </select>
+
+  <br />
+
+  <label for="fileInput">Upload a text file (.txt):</label>
+  <input type="file" id="fileInput" accept=".txt" aria-label="Upload Text File" />
+
+  <br />
+
+  <button id="translateBtn">Translate File Text</button>
+
+  <textarea id="inputText" placeholder="Uploaded text will appear here..." readonly></textarea>
+  <textarea id="translatedText" placeholder="Translation will appear here..." readonly></textarea>
+
+  <button id="downloadBtn" style="display:none;">Download Translated Text</button>
+</div>
+
+<script>
+  const fileInput = document.getElementById('fileInput');
+  const inputText = document.getElementById('inputText');
+  const translatedText = document.getElementById('translatedText');
+  const translateBtn = document.getElementById('translateBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const sourceLang = document.getElementById('sourceLang');
+  const targetLang = document.getElementById('targetLang');
+
+  // Read file content and display
+  fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.type !== "text/plain") {
+      alert("Please upload a valid .txt file.");
+      fileInput.value = ""; // reset input
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      inputText.value = evt.target.result || "";
+      translatedText.value = ""; // Clear previous translation
+      downloadBtn.style.display = 'none';
+    };
+    reader.readAsText(file);
+  });
+
+  // Translation using LibreTranslate API (https://libretranslate.com/)
+  translateBtn.addEventListener('click', async () => {
+    const text = inputText.value.trim();
+    if (!text) {
+      alert("Please upload a text file first.");
+      return;
+    }
+    if (sourceLang.value === targetLang.value) {
+      alert("Please select different source and target languages.");
+      return;
+    }
+
+    translatedText.value = "Translating...";
+    downloadBtn.style.display = 'none';
+
+    try {
+      const response = await fetch('https://libretranslate.com/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          q: text,
+          source: sourceLang.value,
+          target: targetLang.value,
+          format: "text"
+        })
+      });
+
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+      const data = await response.json();
+      translatedText.value = data.translatedText || "";
+      if(translatedText.value) {
+        downloadBtn.style.display = 'inline-block';
+      }
+    } catch (err) {
+      translatedText.value = "";
+      alert("Translation failed: " + err.message);
+    }
+  });
+
+  // Download translated text as a file
+  downloadBtn.addEventListener('click', () => {
+    const text = translatedText.value;
+    if (!text) return;
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'translated_text.txt';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  });
+</script>
+
+</body>
+</html>

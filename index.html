@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <title>Translator App</title>
+  <link rel="stylesheet" href="krish.css" />
+  <style>
+    /* Visually hidden class for accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    button.bx {
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+    }
+    button.bx:focus {
+      outline: 2px solid #0099ff;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="translator_property">
+      <ul class="nav_item" role="list">
+        <li>
+          <label for="fromLang" class="sr-only">From Language</label>
+          <select id="fromLang" name="fromLang" aria-label="Select source language">
+            <option value="en-GB">English</option>
+            <option value="mwr-IN">Marwadi</option>
+            <option value="hi-IN">Hindi</option>
+          </select>
+        </li>
+        <li class="bx bx-transfer" role="button" tabindex="0" aria-label="Swap languages" title="Swap languages"></li>
+        <li>
+          <label for="toLang" class="sr-only">To Language</label>
+          <select id="toLang" name="toLang" aria-label="Select target language">
+            <option value="hi-IN">Hindi</option>
+            <option value="en-GB">English</option>
+            <option value="mwr-IN">Marwadi</option>
+          </select>
+        </li>
+      </ul>
+      <div class="write_box">
+        <div class="property_from">
+          <textarea maxlength="5000" class="fromText" placeholder="Type your text here..." aria-label="Input text to translate"></textarea>
+          <div class="icons">
+            <button class="bx bx-volume-full from" aria-label="Listen to input text" title="Listen to input text"></button>
+            <div class="code_length" aria-live="polite">0/5,000</div>
+          </div>
+        </div>
+        <div class="property_trans">
+          <textarea class="toTranslate" placeholder="Translation will appear here" aria-label="Translated text" readonly></textarea>
+          <div class="icons">
+            <button class="bx bx-volume-full to" aria-label="Listen to translated text" title="Listen to translated text"></button>
+            <button class="bx bx-copy" aria-label="Copy translated text" title="Copy translated text"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="language.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

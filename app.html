@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Chatbot with Theme Toggle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:400,500,700&display=swap" rel="stylesheet"/>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg-main: #f7f8fa;
+      --bg-card: #fff;
+      --bg-nav: #fff;
+      --bg-chat-in: #e6f3fd;
+      --bg-chat-out: #f9fafc;
+      --bg-input: #f4f7fa;
+      --border: #d5e3f5;
+      --brand: #007aff;
+      --text-main: #23272b;
+      --text-nav: #295284;
+      --text-chat-in: #007aff;
+      --text-chat-out: #334a62;
+      --option-bg: #eff3fa;
+      --option-hover: #dbeafe;
+    }
+    body.dark {
+      --bg-main: #111a22;
+      --bg-card: #19232f;
+      --bg-nav: #151923;
+      --bg-chat-in: #11263e;
+      --bg-chat-out: #19232f;
+      --bg-input: #17202a;
+      --border: #27354b;
+      --brand: #0b92f6;
+      --text-main: #e7eaf1;
+      --text-nav: #add9ff;
+      --text-chat-in: #79bcff;
+      --text-chat-out: #eaf4ff;
+      --option-bg: #232b38;
+      --option-hover: #005fc1;
+    }
+    * { box-sizing: border-box; }
+    html, body { height:100%; width:100%; }
+    body {
+      min-height: 100vh;
+      background: var(--bg-main);
+      font-family: 'Roboto', Arial, sans-serif;
+      color: var(--text-main);
+      transition: background .25s, color .25s;
+    }
+    nav {
+      position: sticky; top: 0;
+      width: 100%;
+      background: var(--bg-nav);
+      box-shadow: 0 2px 9px 0 #e6eaf5ab;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      z-index: 20;
+      transition: background .25s;
+    }
+    nav .logo {
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      color: var(--brand);
+      user-select: none;
+      font-family: inherit;
+      text-shadow: 0 0 2px #d0e3ff;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.4rem;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li a {
+      color: var(--text-nav);
+      font-weight: 500;
+      font-size: 1rem;
+      text-decoration: none;
+      padding: 0.47rem 0.9rem;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.17s;
+      user-select: none;
+      display: inline-block;
+    }
+    nav ul li a:hover, nav ul li a.active {
+      background: var(--option-hover);
+      color: var(--brand);
+    }
+    .theme-toggle {
+      margin-left: 2.5rem;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .theme-toggle input[type="checkbox"] { display: none; }
+    .toggle-switch {
+      width: 46px; height: 24px; background: #e2e8f0;
+      border-radius: 14px; position: relative;
+      transition: background .3s;
+      margin-right: 0.4rem;
+    }
+    .toggle-switch::before {
+      content: '';
+      display: block;
+      width: 19px; height: 19px;
+      background: var(--brand);
+      border-radius: 50%;
+      position: absolute; top: 2.3px; left: 3px;
+      transition: left 0.21s, background .3s;
+      box-shadow: 0 1px 4px #1daaff41;
+    }
+    .theme-toggle input[type="checkbox"]:checked + .toggle-switch::before {
+      left: 24px;
+      background: #f3f7fa;
+    }
+    .theme-toggle .bx {
+      font-size: 1.32rem;
+      color: var(--brand);
+      transition: color 0.3s;
+      margin-left: 0.13rem;
+    }
+    /* Chatbot UI Main Container */
+    #chatbot-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 90vh;
+      padding: 2.2rem 0.3rem;
+      background: transparent;
+    }
+    .chatbox {
+      width: 100%;
+      max-width: 530px;
+      background: var(--bg-card);
+      border-radius: 18px;
+      box-shadow: 0 3px 30px 0 #6680aa22;
+      border: 1.3px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: background 0.22s, color 0.22s;
+      position: relative;
+      min-height: 65vh;
+    }
+    .chatbox-header {
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border-bottom: 1px solid var(--border);
+      font-size: 1.27rem;
+      color: var(--brand);
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      user-select: none;
+      font-family: inherit;
+    }
+    .chatbox-messages {
+      flex: 1 1 auto;
+      padding: 1.13rem 1.35rem;
+      background: transparent;
+      overflow-y: auto;
+      color: var(--text-main);
+      font-size: 1rem;
+      line-height: 1.57;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      min-height: 230px;
+    }
+    .chatbox-messages p {
+      margin: 0 0 8px;
+      padding: 8px 13px;
+      border-radius: 11px;
+      max-width: 81%;
+      word-break: break-word;
+      font-size: 1rem;
+      align-self: flex-end;
+      background: var(--bg-chat-in);
+      color: var(--text-chat-in);
+      box-shadow: 0 2px 7px #007aff13;
+    }
+    .chatbox-messages p.bot {
+      align-self: flex-start;
+      background: var(--bg-chat-out);
+      color: var(--text-chat-out);
+      box-shadow: 0 2px 6px #0b9cff14;
+    }
+    /* --- Small Chatbot Input Bar --- */
+    .chatbox-wrapper {
+      display: flex;
+      align-items: center;
+      background: var(--bg-input);
+      padding: 0.11em 0.19em 0.11em 0.28em;
+      border-radius: 11px;
+      box-shadow: 0 1.5px 8px #bfdcff22;
+      margin: 7px auto 11px auto;
+      gap: 0.38em;
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 370px; /* 👈 Smaller max width for compact look */
+    }
+    .chatbox-options {
+      display: flex;
+      align-items: center;
+      gap: 0.28em;
+    }
+    .chatbox-options button {
+      background: var(--option-bg);
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #8cb3df;
+      font-size: 0.97rem;
+      cursor: pointer;
+      transition: background 0.13s, color 0.14s;
+    }
+    .chatbox-options button:hover {
+      background: var(--option-hover);
+      color: var(--brand);
+    }
+    .chatbox-input {
+      flex: 1 1 auto;
+      background: transparent;
+      border: none;
+      padding: 0.32em 0.19em;
+      font-size: 0.98rem;
+      color: var(--text-main);
+      outline: none;
+      min-width: 25px;
+      font-family: inherit;
+    }
+    .chatbox-send {
+      background: var(--brand);
+      border: none;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 1.05rem;
+      margin-left: 0.25em;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .chatbox-send:hover {
+      background: #329fff;
+    }
+    @media (max-width: 480px) {
+      .chatbox-wrapper {max-width: 97vw; padding: 0.02em 0.02em; border-radius: 8px;}
+      .chatbox-input {font-size: 0.87rem; padding: 0.27em 0.11em;}
+      .chatbox-options button, .chatbox-send {width: 20px;height: 20px;font-size: 0.86rem;}
+    }
+
+    /* Team Overlay panel (unchanged) ... */
+    #team-panel {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.98);
+      color: #173355;
+      font-family: 'Roboto', monospace;
+      backdrop-filter: blur(12px);
+      box-shadow: inset 0 0 80px #90bbff19;
+      overflow-y: auto;
+      padding: 3rem 2.1rem;
+      z-index: 20000;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(.9,-0.13,.32,1.16);
+    }
+    body.dark #team-panel {background: rgba(21,33,46,0.97); color: #a9d9ff;}
+    #team-panel.active { transform: translateX(0);}
+    #team-panel header { font-size: 2rem; font-weight: 700; color: var(--brand);
+      text-align: center; margin-bottom: 2rem; user-select: none;}
+    #team-panel ul { list-style: none; max-width: 520px; margin: auto; padding: 0;}
+    #team-panel ul li { background: #f0f5fc; margin-bottom: 1.2rem; border-radius: 13px;
+      padding: 1rem 1.5rem; box-shadow: 0 0 8px #a4dfff15; transition: background .18s;}
+    body.dark #team-panel ul li { background: #193a5d;}
+    #team-panel ul li:hover { background: var(--option-hover);}
+    #team-panel ul li strong { display: block; font-size: 1.1rem; margin-bottom: 0.23rem; color: var(--brand);}
+    #team-panel ul li span { font-size: 0.98rem; color: #2884cc;}
+    .close-btn { position: fixed; top: 1.1rem; right: 2.2rem; font-size: 2rem; cursor: pointer; color: var(--brand);}
+    .close-btn:hover { color:#2474cc; }
+  </style>
+</head>
+<body class="dark">
+
+<nav>
+  <div class="logo">AI Chatbot</div>
+  <ul>
+    <li><a href="index.html">Language</a></li>
+    <li><a href="text.html">Text</a></li>
+    <li><a href="audio.html">Audio</a></li>
+    <li><a href="video.html">Video</a></li>
+    <li><a href="#" id="team-link">Team</a></li>
+  </ul>
+  <label class="theme-toggle" title="Toggle light/dark mode">
+    <input type="checkbox" id="theme-checkbox" />
+    <span class="toggle-switch"></span>
+    <i class='bx bx-sun'></i>
+  </label>
+</nav>
+
+<div id="chatbot-container">
+  <div class="chatbox">
+    <div class="chatbox-header">Ask me anything!</div>
+    <div class="chatbox-messages" id="chat-messages">
+      <p style="color:#7fd7ff;font-style:italic;text-align:center;margin-top:30%;">Start chatting by typing below.</p>
+    </div>
+    <!-- Compact horizontal chat input with options -->
+    <div class="chatbox-wrapper">
+      <div class="chatbox-options">
+        <button title="Search"><i class="bx bx-search"></i></button>
+        <button title="Clear"><i class="bx bx-x"></i></button>
+        <button title="Idea"><i class="bx bx-bulb"></i></button>
+        <button title="Microphone"><i class="bx bx-microphone"></i></button>
+      </div>
+      <input class="chatbox-input" type="text" id="chatbox-input" placeholder="Type your message..."/>
+      <button class="chatbox-send" id="chatbox-send-btn" title="Send"><i class="bx bx-up-arrow-alt"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Team overlay panel -->
+<div id="team-panel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="team-heading">
+  <div class="close-btn" id="team-close">&times;</div>
+  <header id="team-heading">Meet the Team</header>
+  <ul>
+    <li>
+      <strong>Krishna Chandrakant Patil</strong>
+      <span>Lead Developer & AI Specialist</span>
+    </li>
+    <li>
+      <strong>Sakshi B Patil</strong>
+      <span>UI/UX Designer</span>
+    </li>
+    <li>
+      <strong>Rohita Chaudhari</strong>
+      <span>Frontend Engineer</span>
+    </li>
+    <li>
+      <strong>Neha Upadhyay</strong>
+      <span>QA & Testing</span>
+    </li>
+  </ul>
+</div>
+
+<script>
+  // Theme Switcher
+  const themeCheckbox = document.getElementById('theme-checkbox');
+  const body = document.body;
+  const themeIcon = document.querySelector('.theme-toggle .bx');
+  function updateTheme(isLight) {
+    body.className = isLight ? 'light' : 'dark';
+    themeIcon.className = isLight ? 'bx bx-moon' : 'bx bx-sun';
+    themeIcon.title = isLight ? "Switch to dark mode" : "Switch to light mode";
+  }
+  themeCheckbox.addEventListener('change', () => {
+    updateTheme(themeCheckbox.checked);
+    localStorage.setItem('theme', themeCheckbox.checked ? 'light' : 'dark');
+  });
+  // Load saved theme on page load
+  (() => {
+    const saved = localStorage.getItem('theme');
+    const isLight = saved === 'light';
+    themeCheckbox.checked = isLight;
+    updateTheme(isLight);
+  })();
+
+  // Team overlay panel show/hide logic
+  const teamLink = document.getElementById('team-link');
+  const teamPanel = document.getElementById('team-panel');
+  const teamClose = document.getElementById('team-close');
+
+  teamLink.addEventListener('click', e => {
+    e.preventDefault();
+    teamPanel.classList.add('active');
+    teamPanel.setAttribute('aria-hidden', 'false');
+  });
+  teamClose.addEventListener('click', () => {
+    teamPanel.classList.remove('active');
+    teamPanel.setAttribute('aria-hidden', 'true');
+  });
+  teamPanel.addEventListener('click', e => {
+    if (e.target === teamPanel) {
+      teamPanel.classList.remove('active');
+      teamPanel.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // Chatbot send/clear logic for demo
+  const chatInputBox = document.getElementById('chatbox-input');
+  const chatSendBtn = document.getElementById('chatbox-send-btn');
+  const chatMessages = document.getElementById('chat-messages');
+
+  chatSendBtn.addEventListener('click', () => {
+    const text = chatInputBox.value.trim();
+    if (!text) return;
+    const msg = document.createElement('p');
+    msg.textContent = text;
+    chatMessages.appendChild(msg);
+    chatInputBox.value = '';
+    setTimeout(() => {
+      const bot = document.createElement('p');
+      bot.textContent = "I'm an AI assistant demo. Replace me with your bot!";
+      bot.className = 'bot';
+      chatMessages.appendChild(bot);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 650);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+  chatInputBox.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      chatSendBtn.click();
+    }
+  });
+
+  // Option buttons
+  document.querySelector('.chatbox-options .bx-x').onclick = () => chatInputBox.value = '';
+  document.querySelector('.chatbox-options .bx-search').onclick = () => alert("Search feature coming soon!");
+  document.querySelector('.chatbox-options .bx-bulb').onclick = () => alert("Idea feature coming soon!");
+  document.querySelector('.chatbox-options .bx-microphone').onclick = () => alert("Voice input coming soon!");
+</script>
+</body>
+</html>
